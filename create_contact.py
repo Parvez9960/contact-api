@@ -3,22 +3,34 @@ import os
 
 app = Flask(__name__)
 
+# In-memory contact storage (you can replace this with a database later)
+contacts = []
+
 @app.route('/')
 def home():
     return "Hello, World!"
 
 @app.route('/create_contact', methods=['POST'])
 def create_contact():
-    data = request.get_json()  # Get JSON data from the request
-    # Assuming you want to store the contact data (could be in a database)
-    name = data.get('name')
-    email = data.get('email')
-    phone = data.get('phone')
+    # Get JSON data from request
+    contact_data = request.get_json()
 
-    # Here, you can process the data (e.g., store in a database)
-    contact = {"name": name, "email": email, "phone": phone}
+    # Extract contact details (you can modify this as per your needs)
+    name = contact_data.get('name')
+    phone = contact_data.get('phone')
+    email = contact_data.get('email')
 
-    return jsonify({"message": "Contact created", "contact": contact}), 201
+    if not name or not phone or not email:
+        return jsonify({"error": "Missing contact details"}), 400
+
+    # Store the contact (in-memory for now)
+    contacts.append({
+        'name': name,
+        'phone': phone,
+        'email': email
+    })
+
+    return jsonify({"message": "Contact created successfully", "contact": contact_data}), 201
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 5000)))
